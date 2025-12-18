@@ -1,0 +1,4 @@
+pkgs.json
+pkg_db_data/
+*.pkg
+__pycache__/
