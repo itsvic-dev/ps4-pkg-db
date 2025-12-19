@@ -1,7 +1,6 @@
 import enum
 import struct
 from io import BufferedIOBase
-from multiprocessing import RLock
 
 # enum sfo_value_format {
 # 	SFO_FORMAT_STRING_SPECIAL = 0x4,

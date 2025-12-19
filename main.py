@@ -7,9 +7,7 @@ import sys
 import pkg
 import sfo
 
-# TOOLCHAIN = os.getenv("OO_PS4_TOOLCHAIN", "/Users/vic/OpenOrbis/PS4Toolchain")
-# PKGTOOL = os.path.join(TOOLCHAIN, "bin/macos/PkgTool.Core")
-# TMP_FILE = "/tmp/ps4-pkg-db-tmp"
+DATA_DIR = "pkg_db_data"
 
 if len(sys.argv) < 2:
     print(
@@ -18,21 +16,6 @@ if len(sys.argv) < 2:
     exit()
 
 root_url = sys.argv[1]
-
-
-# def read_sfo(param_sfo: bytes):
-#     with open(TMP_FILE, "wb+") as file:
-#         file.write(param_sfo)
-#     out = subprocess.check_output([PKGTOOL, "sfo_listentries", TMP_FILE]).decode()
-#     os.remove(TMP_FILE)
-#     key_values = {}
-#     key_value_re = re.compile(r"^([A-Z_]+)(?:.* = )(.*)$", re.RegexFlag.M)
-#     for match in key_value_re.finditer(out):
-#         key_values[match.groups()[0]] = match.groups()[1]
-
-#     return key_values
-
-
 pkgs_json_contents = []
 digests = set()
 
@@ -70,7 +53,7 @@ for i in glob.iglob("**/*.pkg", recursive=True):
         print("WARNING: digests aren't unique! duplicate file?")
     digests.add(str_digest)
 
-    data_dir = f"pkg_db_data/{str_digest[:2]}/{str_digest[2:]}"
+    data_dir = f"{DATA_DIR}/{str_digest[:1]}/{str_digest[:2]}/{str_digest}"
     json_path = f"{data_dir}/install.json"
     icon0_path = f"{data_dir}/icon0.png" if "icon0.png" in hdr.entries else None
     pic1_path = f"{data_dir}/pic1.png" if "pic1.png" in hdr.entries else None
