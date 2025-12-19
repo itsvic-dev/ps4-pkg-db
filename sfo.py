@@ -67,7 +67,7 @@ def read_sfo(file: BufferedIOBase) -> dict[str, str | int | bytes]:
                 raise Exception("value of type UINT32 is >4 bytes in size (wut?)")
             value = struct.unpack("<I", value)[0]
         if format_enum == Format.String:
-            value = value.decode()
+            value = value[:-1].decode()  # skip null terminator
 
         entries[key] = value
 
