@@ -1,5 +1,5 @@
 pkgs.json
-pkg_db_data/
+.pkgdata/
 *.pkg
 __pycache__/
 .DS_Store

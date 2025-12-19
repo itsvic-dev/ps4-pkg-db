@@ -7,7 +7,7 @@ import sys
 import pkg
 import sfo
 
-DATA_DIR = "pkg_db_data"
+DATA_DIR = ".pkgdata"
 
 if len(sys.argv) < 2:
     print(
@@ -43,7 +43,6 @@ for i in glob.iglob("**/*.pkg", recursive=True):
         game = {
             "name": sfo_data.get("TITLE"),
             "titleID": sfo_data.get("TITLE_ID"),
-            "contentID": hdr.content_id,
             "pkgs": [],
         }
         pkgs_json_contents.append(game)
@@ -106,8 +105,8 @@ for i in glob.iglob("**/*.pkg", recursive=True):
         }
     )
 
+    # these might be incorrect due to a DLC loading first. let's correct just in case
     if hdr.content_type == pkg.PKG_CONTENT_TYPE_GD and icon0_path:
-        # might be incorrect due to a DLC loading first. let's correct just in case
         game["name"] = sfo_data["TITLE"]
         game["icon0_path"] = f"{root_url}/{icon0_path}"
 
