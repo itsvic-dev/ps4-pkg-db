@@ -3,3 +3,4 @@ pkg_db_data/
 *.pkg
 __pycache__/
 .DS_Store
+pkgs

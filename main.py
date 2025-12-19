@@ -1,15 +1,15 @@
 import glob
+import io
 import json
 import os
-import re
-import subprocess
 import sys
 
 import pkg
+import sfo
 
-TOOLCHAIN = os.getenv("OO_PS4_TOOLCHAIN", "/Users/vic/OpenOrbis/PS4Toolchain")
-PKGTOOL = os.path.join(TOOLCHAIN, "bin/macos/PkgTool.Core")
-TMP_FILE = "/tmp/ps4-pkg-db-tmp"
+# TOOLCHAIN = os.getenv("OO_PS4_TOOLCHAIN", "/Users/vic/OpenOrbis/PS4Toolchain")
+# PKGTOOL = os.path.join(TOOLCHAIN, "bin/macos/PkgTool.Core")
+# TMP_FILE = "/tmp/ps4-pkg-db-tmp"
 
 if len(sys.argv) < 2:
     print(
@@ -20,17 +20,17 @@ if len(sys.argv) < 2:
 root_url = sys.argv[1]
 
 
-def read_sfo(param_sfo: bytes):
-    with open(TMP_FILE, "wb+") as file:
-        file.write(param_sfo)
-    out = subprocess.check_output([PKGTOOL, "sfo_listentries", TMP_FILE]).decode()
-    os.remove(TMP_FILE)
-    key_values = {}
-    key_value_re = re.compile(r"^([A-Z_]+)(?:.* = )(.*)$", re.RegexFlag.M)
-    for match in key_value_re.finditer(out):
-        key_values[match.groups()[0]] = match.groups()[1]
+# def read_sfo(param_sfo: bytes):
+#     with open(TMP_FILE, "wb+") as file:
+#         file.write(param_sfo)
+#     out = subprocess.check_output([PKGTOOL, "sfo_listentries", TMP_FILE]).decode()
+#     os.remove(TMP_FILE)
+#     key_values = {}
+#     key_value_re = re.compile(r"^([A-Z_]+)(?:.* = )(.*)$", re.RegexFlag.M)
+#     for match in key_value_re.finditer(out):
+#         key_values[match.groups()[0]] = match.groups()[1]
 
-    return key_values
+#     return key_values
 
 
 pkgs_json_contents = []
@@ -53,9 +53,9 @@ for i in glob.iglob("**/*.pkg", recursive=True):
     if "backport" in i.lower():
         continue  # ignore backports. too confusing...
 
-    sfo_data = read_sfo(hdr.entries["param.sfo"])
+    sfo_data = sfo.read_sfo(io.BytesIO(hdr.entries["param.sfo"]))
 
-    game = find_by_title_id(sfo_data["TITLE_ID"])
+    game = find_by_title_id(str(sfo_data["TITLE_ID"]))
     if game is None:
         game = {
             "name": sfo_data.get("TITLE"),
@@ -134,7 +134,7 @@ for i in glob.iglob("**/*.pkg", recursive=True):
         with open(pic1_path, "wb+") as file:
             file.write(hdr.entries["pic1.png"])
 
-    sfo_data = read_sfo(hdr.entries["param.sfo"])
+    sfo_data = sfo.read_sfo(io.BytesIO(hdr.entries["param.sfo"]))
     version = sfo_data.get("APP_VER", sfo_data.get("VERSION"))
 
 with open("pkgs.json", "w+") as file:
