@@ -113,6 +113,7 @@ for i in glob.iglob("**/*.pkg", recursive=True):
     game["pkgs"].append(
         {
             "name": sfo_data["TITLE"],
+            "contentId": sfo_data["CONTENT_ID"],
             "pkgPath": f"{root_url}/{quote(i)}",
             "jsonPath": f"{root_url}/{quote(json_path)}",
             "icon0Path": f"{root_url}/{quote(icon0_path)}"
