@@ -22,6 +22,40 @@ root_url = sys.argv[1]
 pkgs_json_contents = []
 digests = set()
 
+PS4_LANGS = {
+    0: "ja",
+    1: "en",
+    2: "fr",
+    3: "es",
+    4: "de",
+    5: "it",
+    6: "nl",
+    7: "pt",
+    8: "ru",
+    9: "ko",
+    10: "zh-Hant",
+    11: "zh-Hans",
+    12: "fi",
+    13: "sv",
+    14: "da",
+    15: "no",
+    16: "pl",
+    17: "pt-BR",
+    18: "en-GB",
+    19: "tr",
+    20: "es-LA",
+    21: "ar",
+    22: "fr-CA",
+    23: "cs",
+    24: "hu",
+    25: "el",
+    26: "ro",
+    27: "th",
+    28: "vi",
+    29: "in",
+    30: "uk",
+}
+
 
 def get_split_path(digest: str):
     return f"{DATA_DIR}/{digest[0]}/{digest[1]}/{digest[2:]}"
@@ -61,9 +95,14 @@ for i in glob.iglob("**/*.pkg", recursive=True):
     if game is None:
         game = {
             "name": sfo_data.get("TITLE"),
+            "i18nNames": {},
             "titleID": sfo_data.get("TITLE_ID"),
             "pkgs": [],
         }
+        for id, code in PS4_LANGS.items():
+            title = f"TITLE_{id:02}"
+            if title in sfo_data:
+                game["i18nNames"][code] = sfo_data[title]
         pkgs_json_contents.append(game)
 
     str_digest = "".join([f"{b:02X}" for b in hdr.digest])
@@ -110,29 +149,33 @@ for i in glob.iglob("**/*.pkg", recursive=True):
             file,
         )
 
-    game["pkgs"].append(
-        {
-            "name": sfo_data["TITLE"],
-            "contentId": sfo_data["CONTENT_ID"],
-            "pkgPath": f"{root_url}/{quote(i)}",
-            "jsonPath": f"{root_url}/{quote(json_path)}",
-            "icon0Path": f"{root_url}/{quote(icon0_path)}"
-            if icon0_path is not None
-            else None,
-            "size": os.lstat(i).st_size,
-            "version": clean_ver(sfo_data.get("APP_VER", sfo_data.get("VERSION"))),
-            "type": "PS4GD"
-            if hdr.content_type == pkg.PKG_CONTENT_TYPE_GD
-            else "PS4AC"
-            if hdr.content_type == pkg.PKG_CONTENT_TYPE_AC
-            else "PS4AL"
-            if hdr.content_type == pkg.PKG_CONTENT_TYPE_AL
-            else "PS4DP"
-            if hdr.content_type == pkg.PKG_CONTENT_TYPE_DP
-            else f"unknown_{hdr.content_flags:x}",
-            "isPatch": hdr.isPatch(),
-        }
-    )
+    pkgData = {
+        "name": sfo_data["TITLE"],
+        "i18nNames": {},
+        "contentId": sfo_data["CONTENT_ID"],
+        "pkgPath": f"{root_url}/{quote(i)}",
+        "jsonPath": f"{root_url}/{quote(json_path)}",
+        "icon0Path": f"{root_url}/{quote(icon0_path)}"
+        if icon0_path is not None
+        else None,
+        "size": os.lstat(i).st_size,
+        "version": clean_ver(sfo_data.get("APP_VER", sfo_data.get("VERSION"))),
+        "type": "PS4GD"
+        if hdr.content_type == pkg.PKG_CONTENT_TYPE_GD
+        else "PS4AC"
+        if hdr.content_type == pkg.PKG_CONTENT_TYPE_AC
+        else "PS4AL"
+        if hdr.content_type == pkg.PKG_CONTENT_TYPE_AL
+        else "PS4DP"
+        if hdr.content_type == pkg.PKG_CONTENT_TYPE_DP
+        else f"unknown_{hdr.content_flags:x}",
+        "isPatch": hdr.isPatch(),
+    }
+    for id, code in PS4_LANGS.items():
+        title = f"TITLE_{id:02}"
+        if title in sfo_data:
+            pkgData["i18nNames"][code] = sfo_data[title]
+    game["pkgs"].append(pkgData)
 
     # these might be incorrect due to a DLC loading first. let's correct just in case
     if hdr.content_type == pkg.PKG_CONTENT_TYPE_GD and icon0_path:
