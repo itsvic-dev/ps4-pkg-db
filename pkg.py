@@ -68,7 +68,7 @@ def read_pkg_header(file: io.BufferedIOBase) -> PkgHeader:
     content_type = __rd_packed(file, ">I", 4, 0x74)[0]
     content_flags = __rd_packed(file, ">I", 4, 0x78)[0]
     package_size = __rd_packed(file, ">Q", 8, 0x430)[0]
-    pkg_digest = __rd_packed(file, "20s", 20, 0xFE0)[0]
+    pkg_digest = __rd_packed(file, "32s", 32, 0xFE0)[0]
 
     entries: dict[str, bytes] = {}
     for i in range(0, entry_count):
